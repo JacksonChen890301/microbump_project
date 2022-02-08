@@ -1,7 +1,3 @@
----
-title: 'Microbump前處理紀錄'
-tags: 'LAB'
----
 # Microbump前處理紀錄  
 
 ## 問題概述  
