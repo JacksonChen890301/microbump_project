@@ -88,7 +88,7 @@ Sn-Ag銲錫並非完美的替代品。因為其熔點較Sn-Pb高，使得Sn-Ag�
 <div align=center><font size=3>圖4-2、ANSYS計算之電阻分布</font></div>
 
 ## 4.2深度學習電阻預測結果
-<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312851-0a1f91fd-ef5c-4f05-a06d-be15932ae0bf.png width="500"></div>
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312851-0a1f91fd-ef5c-4f05-a06d-be15932ae0bf.png width="700"></div>
 
 ## 4.3分層相關性傳播(Layer-wise relevance propagation)分析
 <font size=3>類神經網路憑藉其高效能，近年來在各領域已被廣泛運用。然而，因為模型本身的高複雜度，造成解釋力低下，甚至被比喻為黑箱。為解決這類模型不透明的現象，目前已發展出多種手段能初步分析其下判斷的理由，並藉此審視模型是否有不合邏輯或帶有偏見等狀況。為此，本計畫使用分層相關性傳播方法(Layer-wise relevance propagation, 以下簡稱LRP)，彌補此種模型預測依據存疑的缺點。<br>
@@ -97,7 +97,7 @@ LRP最早發表於Bach et al.(2015)[6]，一般用於解釋影像辨識模型。
   
 圖4-3為根據LRP分析本模型的結果所繪製之熱度圖。其中，圖(a)(b)(c)(d)分別代表不同截面，紅色熱度點的分布則表示該體素和電阻的相關性。經由此圖，可得出以下結論。(1)背景資訊對預測結果幾乎毫無貢獻，符合正常邏輯。(2)相較於銅，中央銲錫的重要性明顯較高，且集中在其邊緣。綜上，本模型確實從訓練資料中歸納出一套機制以過濾多餘的資訊。</font>
 
-<div align=center><img src=https://user-images.githubusercontent.com/55709819/156313188-36df186e-05e1-496c-9e18-6c7ae8c72669.png width="500"></div>
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156313188-36df186e-05e1-496c-9e18-6c7ae8c72669.png width="700"></div>
 <div align=center><font size=3>圖4-4、銲錫微凸塊中體素與電阻之相關性</font></div>
 
 # 第五章 結論
