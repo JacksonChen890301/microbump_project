@@ -49,6 +49,85 @@ Sn-Ag銲錫並非完美的替代品。因為其熔點較Sn-Pb高，使得Sn-Ag�
 本計畫有限元素法求解過程所考慮的邊界條件僅有電流及電壓。其中，電流設定為1.5安培，並施加於導線入口，導線出口的邊界條件則設置為電壓等於零，如圖3-4。以上的計算皆在有限元素法模擬軟體ANSYS上運行，並使用其提供的元素類型，SOLID226。此元素適用於三維的電磁場、熱場、電場、壓電、結構場等耦合分析，為二階的三維六面體。其中，每個單元有20個節點，每個節點有6個自由度(UX、UY、UZ、TEMP、VOLT、MAG)，如圖3-5。</font>
 <div align=center><font size=3>表3-1、模擬所使用之電阻率</font></div>
 <div align=center><img src=https://user-images.githubusercontent.com/55709819/156311044-05312ccd-45bf-4247-bf26-e174c6d02537.png width="500"></div>
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156311268-c397e73f-e542-421a-b64b-5d882d917732.png width="500"></div>
+<div align=center><font size=3>圖3-4、邊界條件示意圖</font></div>
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156311559-c526390d-3a05-44cd-b588-a7e34a1112fd.png width="500"></div>
+<div align=center><font size=3>圖3-5、SOLID226幾何結構</font></div>
+
+## 3.3 深度學習模型設計  
+<font size=3>本計畫以三維卷積神經網路（3D Convolutional Neural Network以下簡稱為CNN）為基礎，打造更加快速、簡便的模型，重現ANSYS模擬之結果。CNN憑藉其在圖像處理任務上優異的準確度，已被廣泛的應用在斷層造影相關問題。例如，肺結節病徵判別[14]以及阿茲海默症診斷[15]。<br>
+  
+雖然CNN已是各領域研究中的常客，它仍有一些已知的缺點。(1)它無視圖樣中前景與背景之關係，所有像素皆平等的進入運算，造成計算量的浪費；(2)高階特徵比起低階特徵的泛用性低非常多，造成計算量以及儲存空間的浪費；(3)傳統CNN對於空間上距離較遠之特徵的相關性難以評估。為了彌補以上的不足，本計畫使用由Facebook及UC Berkeley聯合發表的Visual Transformer(以下簡稱VT)架構作為補強。該論文的核心思想強調了圖像和語言的相似性，認為影像可拆解為前景、背景等多個物件，正如同語句由多個單字所構成。因此，VT融合了近年在圖像描述、聊天機器人、語音辨識以及機器翻譯等各領域大放異彩的Transformer模型以突破目前CNN模型的瓶頸。</font>  
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156311771-ee6d9666-5da9-4654-b814-367722d5325b.png width="500"></div>
+<div align=center><font size=3>圖 3-6、本計畫使用之神經網路結構圖</font></div>
+
+## 3.4 模型訓練細節  
+<font size=3>供模型訓練之資料共包含了四個晶片，每個晶片上可量測的電路有400顆微凸塊，並且每個試片都會在260˚C下迴銲至少30分鐘後，再測量一次電阻。因此，理論上會有3200顆微凸塊的資料。然而數據並不是完好無損，所以經由前處理完成資料清洗後，能用於模擬的微凸塊僅存1699顆。其中，剛銲接完成之初始狀態微凸塊有1040顆，迴銲30分鐘以上之微凸塊則有659顆。<br>
+  
+為了使深度學習模型有足夠泛化能力並充分收斂，樣本會被切割為訓練及驗證組，比例約為四比一。訓練組的資料會幫助模型學習、將誤差收斂至最小，而驗證組則用於檢查前者所訓練出的模型是否有足夠的準確度，並防止訓練過程發生過擬合的現象。經過反覆的訓練及參數調整，得到驗證組預測誤差最低的模型後，再以額外保留的90筆測試組資料做為最後的評估手段，藉此保障模型的泛用性，詳細資料分布如表3-2。<br>
+  
+訓練模型所使用的損失函數為均方誤差(Mean square error, MSE)，使用Adam(adaptive moment estimation)優化器，並設定正則化參數為0.003。訓練用的硬體設備為Tesla V100 GPU，以64為batch size訓練150個epoch。</font>
+<div align=center><font size=3>表3-2、資料分布</font></div>
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312033-cd38b46a-780f-49b4-9498-a01437c2213f.png width="500"></div>
+<div align=center><font size=3>* Testing所使用的90顆微凸塊為電路上的一完整區域</font></div>
+
+# 第四章 結果與討論
+
+## 4.1有限元素法模擬結果
+<font size=3>每個微凸塊在ANSYS上建模並完成計算，大約需要一個小時。圖4-1為電壓分布之計算結果。完成樣本共四個晶片的微凸塊計算後，透過將每個區域400顆微凸塊的模擬電阻加總，即可推知完整電路的模擬結果。考慮到資料有缺損或雜訊嚴重之情形，電路中無法求出模擬數值的微凸塊則會以該電路剩餘微凸塊的平均值作為代替，如圖4-2。其中，圖(a)為剛完成銲接之初始狀態，圖(b)為迴銲30分鐘後之狀態，空白區域為缺失的微凸塊資料。<br>
+  
+模擬完成並與實際電路量測資料比對後，可發現模擬計算之電阻值大約為實際電阻值的60%，呈現固定比例差距的關係，如表4-1。且在初始及長時間迴銲後兩種電阻差異高達20%的樣本中，模擬上皆取得相似的誤差，由此可確定有限元素法之計算結果能有效反映樣本間的差距。</font>
+<div align=center><font size=3>表4-1、其中兩片初始及迴銲狀態資料較完整之晶片模擬結果</font></div>
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312350-6e8c4ee6-f25e-4963-91b5-6f13f945e723.png width="500"></div>
+<div align=center><font size=3>* Ratio = Simulation / Experiment</font></div>
+
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312552-8323a3e9-f2a2-4aaf-9736-9a2aac5f32fa.png width="500"></div>
+<div align=center><font size=3>圖4-1、ANSYS計算之微凸塊電壓分布</font></div>
+
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312680-352455f5-b6e6-4eb8-aaab-df64e12a11d0.png width="500"></div>
+<div align=center><font size=3>圖4-2、ANSYS計算之電阻分布</font></div>
+
+## 4.2深度學習電阻預測結果
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156312851-0a1f91fd-ef5c-4f05-a06d-be15932ae0bf.png width="500"></div>
+
+## 4.3分層相關性傳播(Layer-wise relevance propagation)分析
+<font size=3>類神經網路憑藉其高效能，近年來在各領域已被廣泛運用。然而，因為模型本身的高複雜度，造成解釋力低下，甚至被比喻為黑箱。為解決這類模型不透明的現象，目前已發展出多種手段能初步分析其下判斷的理由，並藉此審視模型是否有不合邏輯或帶有偏見等狀況。為此，本計畫使用分層相關性傳播方法(Layer-wise relevance propagation, 以下簡稱LRP)，彌補此種模型預測依據存疑的缺點。<br>
+  
+LRP最早發表於Bach et al.(2015)[6]，一般用於解釋影像辨識模型。LRP可以計算出輸入的影像資料中，每一個像素(pixel)對於辨識結果的重要性(relevance)，最終由熱度圖(heatmap)呈現重要性隨像素的分布。LRP演算法相當直觀，透過反向傳播，將輸出層的結果根據各神經元的權重分配至前一層，並一路回推到輸入層，如圖 4-2[5]所示。因此，本研究可利用LRP計算出的相關性分布，得知銲錫微凸塊三維結構中各體素(voxel)對電阻的貢獻。<br>
+  
+圖4-3為根據LRP分析本模型的結果所繪製之熱度圖。其中，圖(a)(b)(c)(d)分別代表不同截面，紅色熱度點的分布則表示該體素和電阻的相關性。經由此圖，可得出以下結論。(1)背景資訊對預測結果幾乎毫無貢獻，符合正常邏輯。(2)相較於銅，中央銲錫的重要性明顯較高，且集中在其邊緣。綜上，本模型確實從訓練資料中歸納出一套機制以過濾多餘的資訊。</font>
+
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/156313188-36df186e-05e1-496c-9e18-6c7ae8c72669.png width="500"></div>
+<div align=center><font size=3>圖4-4、銲錫微凸塊中體素與電阻之相關性</font></div>
+
+# 第五章 結論
+
+# 參考文獻
+[1] 	Jang, J. W., et al. "High-lead flip chip bump cracking on the thin organic substrate in a module package." Microelectronics Reliability 52.2 (2012): 455-460.<br>
+[2] 	Y.W. Chang, C. Chen, T.C. Chang, C.J. Zhan, J.Y. Juang, A.T. Huang, Mater. Lett. 137, 136 (2014)<br>
+[3] 	Liang, Y. C., Chih Chen, and King-Ning Tu. "Side wall wetting induced void formation due to small solder volume in microbumps of Ni/SnAg/Ni upon reflow." ECS Solid State Letters 1.4 (2012): P60.<br>
+[4] 	LeCun, Yann, et al. "Gradient-based learning applied to document recognition." Proceedings of the IEEE 86.11 (1998): 2278-2324.<br>
+[5] 	Vaswani, Ashish, et al. "Attention is all you need." arXiv preprint arXiv:1706.03762 (2017).<br>
+[6] 	S. Bach, A. Binder, G. Montavon, F. Klauschen, K.-R. Müller, and W. Samek, “On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation,” PLOS ONE, vol. 10, no. 7, p. e0130140, Jul. 2015.<br>
+[7] 	H. K. Kim, H. K. Liou, and K. N. Tu, J. Materials Research, 10, 497(1995)<br>
+[8] 	J.S. Hwang and R.M. Vargas, Soldering & Surface Mount Technology, 2, 38 (1990)<br>
+[9] 	V.B. Fiks, USoviet Physics-Solid StateU, 1,pp.14-28,1959.<br>
+[10] 	J. W. Jang, D. R. Frear, T. Y. Lee and K. N. Tu, J. Applied Physics, 88, 6359 (2000)<br>
+[11] 	Y.C. Liang, C. Chen, K.N. Tu, ECS Solid State Lett. 1, 60 (2012).<br>
+[12] 	Chen, Chih, Doug Yu, and Kuan-Neng Chen. "Vertical interconnects of microbumps in 3D integration." MRS bulletin 40.3 (2015): 257-263.<br>
+[13] 	Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E. Hinton. "Imagenet classification with deep convolutional neural networks." Advances in neural information processing systems 25 (2012).<br>
+[14] 	Huang, Xiaojie, Junjie Shan, and Vivek Vaidya. "Lung nodule detection in CT using 3D convolutional neural networks." 2017 IEEE 14th International Symposium on Biomedical Imaging (ISBI 2017). IEEE, 2017.<br>
+[15] 	Gao, Xiaohong W., Rui Hui, and Zengmin Tian. "Classification of CT brain images based on deep learning networks." Computer methods and programs in biomedicine 138 (2017): 49-56.<br>
+[16] 	Gonzalez, Rafael C.; Woods, Richard E. (2008). Digital Image Processing (3rd ed.). Prentice Hall. p. 128.(3.1)<br>
+
+
+
+
+
+
+
+
+
 
 
 
