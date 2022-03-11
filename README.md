@@ -88,6 +88,12 @@ Sn-Ag銲錫並非完美的替代品。因為其熔點較Sn-Pb高，使得Sn-Ag�
 <div align=center><font size=3>圖4-2、ANSYS計算之電阻分布</font></div>
 
 ## 4.2深度學習電阻預測結果
+<font size=3>本模型的預測能力在驗證組及測試組上皆有優良表現，如圖4-3所示。其中，橫軸代表ANSYS模擬值，縱軸代表模型預測值。每個點都是一顆微凸塊的計算結果，並分別以紅、藍色代表長時間迴銲後以及初始狀態下之微凸塊。若以均方根誤差(Root Mean Square Error, RMSE)作為評價誤差的標準，兩組資料上的預測誤差僅有約0.14mΩ，相當於平均模擬電阻值的1%。此結果反映該模型已訓練出有效的判斷機制，得以擬合有限元素法的計算結果。</font>
+
+<div align=center><img src=https://user-images.githubusercontent.com/55709819/157802412-04252e73-c364-4bcb-aeb8-05cbb75569f2.png width="500"></div>
+
+<font size=3>若將本模型與卷積層結構相同的CNN模型做比較，可發現兩者雖然在驗證組上表現相近，但是在測試組上的表現有著明顯落差。其中，普通的CNN模型在測試組上的RMSE約為0.21mΩ。因此，可推知使用了VT架構的模型在泛用性上略勝一般的CNN模型一籌。</font>
+
 <div align=center><img src=https://user-images.githubusercontent.com/55709819/156312851-0a1f91fd-ef5c-4f05-a06d-be15932ae0bf.png width="700"></div>
 
 ## 4.3分層相關性傳播(Layer-wise relevance propagation)分析
@@ -101,6 +107,10 @@ LRP最早發表於Bach et al.(2015)[6]，一般用於解釋影像辨識模型。
 <div align=center><font size=3>圖4-4、銲錫微凸塊中體素與電阻之相關性</font></div>
 
 # 第五章 結論
+<font size=3>本計畫透過深度學習模型，簡化了常用於分析物理現象的有限元素法在銲錫微凸塊上的計算過程。將原本在ANSYS上需要約一小時的模擬時間縮小至僅需數秒。此成果主要歸功於深度學習模型的輸入不需要複雜的三維元素建模，也不需要對資料做太多的人為處理，就能夠透過深度學習可有效捕捉潛在特徵的特性，取代原本須繁複計算的模擬流程。並且，在分層相關性傳播等工具的使用下，能確保模型的可解釋性，以便對模型的計算結果歸因。若進一步將本計畫之方法或模型優化，可部屬於工業上，對產品做即時量測及分析，增加品質管理的手段。<br>
+  
+本計畫仍有不少繼續發展的空間。例如，在數據充足的情況下，可透過初始狀態下的微凸塊形貌，預測經過一固定時間迴銲後之電阻上升量，或是預測一個微凸塊在高溫下使用多久後會完全斷裂。以上的研究主題除了提供更多對產品的分析方向之外，也有助於微凸塊設計上的改善。</font> 
+
 
 # 參考文獻
 [1] 	Jang, J. W., et al. "High-lead flip chip bump cracking on the thin organic substrate in a module package." Microelectronics Reliability 52.2 (2012): 455-460.<br>
@@ -119,6 +129,10 @@ LRP最早發表於Bach et al.(2015)[6]，一般用於解釋影像辨識模型。
 [14] 	Huang, Xiaojie, Junjie Shan, and Vivek Vaidya. "Lung nodule detection in CT using 3D convolutional neural networks." 2017 IEEE 14th International Symposium on Biomedical Imaging (ISBI 2017). IEEE, 2017.<br>
 [15] 	Gao, Xiaohong W., Rui Hui, and Zengmin Tian. "Classification of CT brain images based on deep learning networks." Computer methods and programs in biomedicine 138 (2017): 49-56.<br>
 [16] 	Gonzalez, Rafael C.; Woods, Richard E. (2008). Digital Image Processing (3rd ed.). Prentice Hall. p. 128.(3.1)<br>
+[17] 	Bichen Wu, Chenfeng Xu, Xiaoliang Dai, Alvin Wan, Peizhao Zhang, Masayoshi Tomizuka, Kurt Keutzer, and Peter Vajda. Visual transformers: Token-based image representation and processing for computer vision. arXiv:2006.03677, 2020.
+[18] 	Woo, Sanghyun, et al. "Cbam: Convolutional block attention module." Proceedings of the European conference on computer vision (ECCV). 2018.
+[19] 	Samek, Wojciech, et al., eds. Explainable AI: interpreting, explaining and visualizing deep learning. Vol. 11700. Springer Nature, 2019.
+
 
 
 
